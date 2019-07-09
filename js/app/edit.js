@@ -65,10 +65,10 @@ function(Layer, Annotator, util) {
         sidebarSpacer = document.createElement("div"),
         sidebarContainer = document.createElement("div"),
         sidebar = createSidebar(params, data, annotator);
-    imageContainerSpacer.className = "edit-image-top-menu";
-    imageContainer.className = "edit-image-display";
-    imageContainer.appendChild(imageContainerSpacer);
-    imageContainer.appendChild(imageLayer.canvas);
+    // imageContainerSpacer.className = "edit-image-top-menu";
+    // imageContainer.className = "edit-image-display";
+    // imageContainer.appendChild(imageContainerSpacer);
+    // imageContainer.appendChild(imageLayer.canvas);
     annotatorContainer.className = "edit-image-display";
     annotatorContainer.appendChild(annotatorTopMenu);
     annotatorContainer.appendChild(annotator.container);
@@ -109,7 +109,7 @@ function(Layer, Annotator, util) {
     spacer1.className = "edit-image-top-spacer";
     boundaryButton.id = "boundary-button";
     boundaryButton.className = "edit-image-top-button";
-    boundaryButton.appendChild(document.createTextNode("boundary"));
+    boundaryButton.appendChild(document.createTextNode("Superpixel Size"));
     boundaryButton.addEventListener("click", function () {
       if (boundaryFlashTimeoutID)
         window.clearTimeout(boundaryFlashTimeoutID);
@@ -139,7 +139,7 @@ function(Layer, Annotator, util) {
     });
     imageButton.className = "edit-image-top-button " +
                             "edit-image-top-button-enabled";
-    imageButton.appendChild(document.createTextNode("image"));
+    imageButton.appendChild(document.createTextNode("Transparency"));
     imageButton.addEventListener("click", function () {
       if (imageButton.classList.contains("edit-image-top-button-enabled"))
         annotator.hide("image");
@@ -209,14 +209,38 @@ function(Layer, Annotator, util) {
         exportButton = document.createElement("input"),
         manualText;
     exportButton.type = "submit";
-    exportButton.value = "export";
+    exportButton.value = "save";
     exportButton.className = "edit-sidebar-submit";
     exportButton.addEventListener("click", function () {
+      var filedata=data.annotationURLs[params.id].split(/[\\/]/);
       var filename = (data.annotationURLs) ?
-          data.annotationURLs[params.id].split(/[\\/]/).pop() :
-          params.id + ".png";
-      downloadURI(annotator.export(), filename);
+          filedata.pop() :
+          params.id;
+      var set=filedata.pop();
+      var formdata = new FormData();
+      formdata.append("data" , annotator.export());
+      formdata.append("file" , set+"_"+filename.slice(0, -4));
+      var xhr = (window.XMLHttpRequest) ? new XMLHttpRequest() : new activeXObject("Microsoft.XMLHTTP");
+      xhr.open( 'post', 'https://nikkelitous.com/data/save.php', true );
+      var nextid=Math.floor(Math.random() * data.imageURLs.length);
+      window.open(util.makeQueryParams(params, {id: nextid }),'_self');
+      xhr.send(formdata);
+      //downloadURI(annotator.export(), filename);
     });
+    // saveButton.type = "submit";
+    // saveButton.value = "save";
+    // saveButton.className = "edit-sidebar-save";
+    // saveButton.addEventListener("click", function () {
+    //   var filename = (data.annotationURLs) ?
+    //       data.annotationURLs[params.id].split(/[\\/]/).pop() :
+    //       params.id + ".png";
+    //   var data = new FormData();
+    //   data.append("data" , "annotator.export()");
+    //   var xhr = (window.XMLHttpRequest) ? new XMLHttpRequest() : new activeXObject("Microsoft.XMLHTTP");
+    //   xhr.open( 'post', 'data/save.php', true );
+    //   xhr.send(data);
+    //   //downloadURI(annotator.export(), filename);
+    // });
     spacer1.className = "edit-sidebar-spacer";
     undoButton.className = "edit-sidebar-button";
     undoButton.appendChild(document.createTextNode("undo"));
@@ -457,7 +481,7 @@ function(Layer, Annotator, util) {
           width: params.width,
           height: params.height,
           colormap: data.colormap,
-          superpixelOptions: { method: "slic", regionSize: 25 },
+          superpixelOptions: { method: "slic", regionSize: 50 },
           onload: function () {
             if (data.annotationURLs)
               annotator.import(data.annotationURLs[id]);

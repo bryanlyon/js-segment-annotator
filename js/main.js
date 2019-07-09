@@ -5,7 +5,7 @@ requirejs(['app/index',
            'helper/colormap',
            'helper/util'],
 function(indexPage, editPage, colormap, util) {
-  var dataURL = "data/example.json",  // Change this to another dataset.
+  var dataURL = "data/faceseg.json",  // Change this to another dataset.
       params = util.getQueryParams();
 
   // Create a colormap for display. The following is an example.
